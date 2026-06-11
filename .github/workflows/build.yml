@@ -7,27 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: windows-latest
-            args: ""
-            output: windows
-            artifact: windows
-          - platform: macos-latest # arm64 (Apple Silicon)
-            args: "--target aarch64-apple-darwin"
-            triple: aarch64-apple-darwin
-            output: mac
-            artifact: mac-arm64
-          - platform: macos-15-intel # x86_64 (Intel)
-            args: "--target x86_64-apple-darwin"
-            triple: x86_64-apple-darwin
-            output: mac
-            artifact: mac-x64
-
-    runs-on: ${{ matrix.platform }}
+  build-windows:
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -36,8 +17,6 @@ jobs:
           node-version: 22
 
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.triple || '' }}
 
       - uses: swatinem/rust-cache@v2
         with:
@@ -48,18 +27,16 @@ jobs:
 
       - name: Download FFmpeg sidecar binaries
         run: npm run fetch-ffmpeg
-        env:
-          TAURI_TARGET_TRIPLE: ${{ matrix.triple || '' }}
 
       - name: Build app
-        run: npm run tauri -- build ${{ matrix.args }}
+        run: npm run tauri -- build
 
       - name: Stage latest builds
-        run: node scripts/stage-builds.mjs ${{ matrix.output }}
+        run: node scripts/stage-builds.mjs windows
 
       - name: Upload latest builds
         uses: actions/upload-artifact@v4
         with:
-          name: latest-builds-${{ matrix.artifact }}
+          name: latest-builds-windows
           path: latest_builds
           if-no-files-found: error
