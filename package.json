@@ -10,6 +10,10 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "fetch-ffmpeg": "node scripts/fetch-ffmpeg.mjs",
+    "clean:bundles": "node scripts/clean-bundles.mjs",
+    "build:linux": "tauri build --bundles deb",
+    "stage:linux": "node scripts/stage-builds.mjs linux",
+    "latest:linux": "npm run clean:bundles && npm run build:linux && npm run stage:linux",
     "tauri": "tauri"
   },
   "license": "MIT",

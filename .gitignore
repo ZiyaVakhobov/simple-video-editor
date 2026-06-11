@@ -8,3 +8,15 @@ node_modules
 !.env.example
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+/latest_builds/*
+!/latest_builds/.gitkeep
+!/latest_builds/windows/
+!/latest_builds/mac/
+!/latest_builds/linux/
+/latest_builds/windows/*
+!/latest_builds/windows/.gitkeep
+/latest_builds/mac/*
+!/latest_builds/mac/.gitkeep
+/latest_builds/linux/*
+!/latest_builds/linux/.gitkeep
