@@ -2,6 +2,7 @@ name: Build desktop apps
 
 on:
   push:
+    branches: ["main"]
     tags: ["v*"]
   workflow_dispatch:
 
@@ -20,7 +21,7 @@ jobs:
             triple: aarch64-apple-darwin
             output: mac
             artifact: mac-arm64
-          - platform: macos-13 # x86_64 (Intel)
+          - platform: macos-15-intel # x86_64 (Intel)
             args: "--target x86_64-apple-darwin"
             triple: x86_64-apple-darwin
             output: mac
@@ -36,7 +37,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ contains(matrix.args, 'aarch64') && 'aarch64-apple-darwin' || contains(matrix.args, 'x86_64-apple') && 'x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.triple || '' }}
 
       - uses: swatinem/rust-cache@v2
         with:
@@ -51,15 +52,7 @@ jobs:
           TAURI_TARGET_TRIPLE: ${{ matrix.triple || '' }}
 
       - name: Build app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: ${{ matrix.args }}
-          # On tag push, create a draft GitHub release with all artifacts attached
-          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
-          releaseName: ${{ startsWith(github.ref, 'refs/tags/') && format('Video Editor {0}', github.ref_name) || '' }}
-          releaseDraft: true
+        run: npm run tauri -- build ${{ matrix.args }}
 
       - name: Stage latest builds
         run: node scripts/stage-builds.mjs ${{ matrix.output }}
